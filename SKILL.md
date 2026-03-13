@@ -90,7 +90,7 @@ pip3 install pycryptodome zstandard pyyaml
 
 ```bash
 cd <skill_dir>/scripts/decrypt
-cc -O2 -o find_all_keys_macos find_all_keys_macos.c -framework Foundation
+cc -O2 -o find_all_keys_macos find_all_keys_macos.c
 ```
 
 > 编译不需要 sudo。运行密钥提取时才需要 sudo。微信桌面版必须正在运行。

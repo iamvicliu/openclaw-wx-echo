@@ -9,7 +9,7 @@
  *   - Must run as root (sudo)
  *
  * Build:
- *   cc -O2 -o find_all_keys_macos find_all_keys_macos.c -framework Foundation
+ *   cc -O2 -o find_all_keys_macos find_all_keys_macos.c
  *
  * Usage:
  *   sudo ./find_all_keys_macos [pid]

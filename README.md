@@ -159,11 +159,10 @@ SKILL.md                      — OpenClaw Skill 定义（Agent 读这个）
 - **macOS Only** — 密钥提取只支持 macOS（Windows 需要不同的内存扫描）
 - **需要 sudo 或 Full Disk Access** — 读微信数据库目录需要权限
 
-### 🟡 待验证
+### 🟡 待完善
 
-- **refresh_decrypt.py 未在真实环境跑过** — WAL patch 在 mock 数据上测试通过
-- **首次同步大量历史消息的性能** — 几十万条消息时未测
-- **不同微信版本的 DB 结构差异** — 列名可能不同（已处理 `create_time` vs `CreateTime`）
+- **首次同步大量历史消息较慢** — 几十万条消息需要几分钟，可以 `--chatroom` 分批
+- **不同微信版本的 DB 结构差异** — 已处理 `create_time` vs `CreateTime`，可能有遗漏
 
 ### 🟢 改进方向
 

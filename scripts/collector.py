@@ -506,7 +506,8 @@ def run_sync(chatroom_filter=None, auto_discover=True):
         # 循环直到没有新消息（每批 LIMIT 2000）
         while True:
             n, new_lid = sync_one(cid, last)
-            if n > 0 or new_lid != last:
+            progressed = new_lid != last
+            if progressed:
                 with sqlite3.connect(COLLECTOR_DB, timeout=30) as conn:
                     conn.execute(
                         "INSERT OR REPLACE INTO sync_state(chatroom_id,last_local_id,last_sync_at) VALUES(?,?,strftime('%s','now'))",
@@ -514,8 +515,9 @@ def run_sync(chatroom_filter=None, auto_discover=True):
                     )
                 chat_total += n
                 last = new_lid
-            if n == 0:
-                break  # 没有新消息了
+            if not progressed:
+                break  # 没有新数据也没有进展（真正读完了）
+            # n==0 但 lid 推进 = 全是重复，继续读下一批
         if chat_total > 0:
             print(f'[sync] {get_name(cid)}: +{chat_total}')
             total_inserted += chat_total
