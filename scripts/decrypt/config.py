@@ -37,10 +37,13 @@ def load_config(config_path=None):
     base = os.path.dirname(os.path.abspath(config_path))
 
     def _abs(p):
-        """将相对路径转为基于配置文件目录的绝对路径"""
-        if p and not os.path.isabs(p):
+        """将相对路径转为基于配置文件目录的绝对路径，支持 ~ 展开"""
+        if not p:
+            return ''
+        p = os.path.expanduser(p)
+        if not os.path.isabs(p):
             return os.path.join(base, p)
-        return p or ''
+        return p
 
     wechat = raw.get('wechat', {})
     monitor = raw.get('monitor', {})
@@ -48,7 +51,7 @@ def load_config(config_path=None):
 
     cfg = {
         # 微信
-        'db_dir': os.path.expanduser(wechat.get('db_dir', '')),
+        'db_dir': _abs(wechat.get('db_dir', '')),
         'self_wxid': wechat.get('self_wxid', ''),
         'decrypted_dir': _abs(wechat.get('decrypted_dir', './decrypted')),
         'collector_db': _abs(wechat.get('collector_db', './collector.db')),
