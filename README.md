@@ -9,6 +9,18 @@
 
 ---
 
+## 🦞 龙虾快速开始
+
+复制下面这段话发给你的 Agent（大黄 / Claude / 任何 OpenClaw Agent）：
+
+> 帮我安装微信助手 skill：先 git clone https://github.com/laolin5564/wechat-assistant 到 ~/.openclaw/skills/wechat-assistant，然后按 SKILL.md 引导我设置
+
+Agent 会自动帮你：克隆代码 → 编译工具 → 提取密钥 → 解密 → 同步 → 注册定时任务。**全程跟着 Agent 走就行。**
+
+> ⚠️ 需要 macOS + 微信桌面版正在运行 + `pip3 install pycryptodome zstandard pyyaml`
+
+---
+
 ## ✨ 功能
 
 <p align="center">
