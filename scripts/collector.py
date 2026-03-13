@@ -472,12 +472,23 @@ def run_sync(chatroom_filter=None, auto_discover=True):
     with sqlite3.connect(COLLECTOR_DB) as conn:
         watched = conn.execute("SELECT chatroom_id FROM watched_chats").fetchall()
 
-    # 首次运行自动发现
-    if not watched and auto_discover and not chatroom_filter:
-        print('[sync] watched_chats 为空，自动发现会话...')
-        discover_chatrooms()
-        with sqlite3.connect(COLLECTOR_DB) as conn:
-            watched = conn.execute("SELECT chatroom_id FROM watched_chats").fetchall()
+    # 首次运行自动发现（--chatroom 也触发，确保目标在 watched_chats 中）
+    if not watched and auto_discover:
+        if chatroom_filter:
+            # 只添加指定的 chatroom
+            with sqlite3.connect(COLLECTOR_DB, timeout=30) as conn:
+                conn.execute(
+                    "INSERT OR IGNORE INTO watched_chats(chatroom_id, chatroom_name) VALUES(?, ?)",
+                    (chatroom_filter, get_name(chatroom_filter))
+                )
+                conn.commit()
+            with sqlite3.connect(COLLECTOR_DB) as conn:
+                watched = conn.execute("SELECT chatroom_id FROM watched_chats").fetchall()
+        else:
+            print('[sync] watched_chats 为空，自动发现会话...')
+            discover_chatrooms()
+            with sqlite3.connect(COLLECTOR_DB) as conn:
+                watched = conn.execute("SELECT chatroom_id FROM watched_chats").fetchall()
 
     if not watched:
         print('[sync] 没有要同步的会话。请先运行 --discover 或手动添加。')

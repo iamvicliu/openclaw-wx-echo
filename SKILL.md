@@ -17,7 +17,7 @@
 ## Prerequisites
 
 - **macOS** + 微信桌面版 4.0+
-- **Python 3.10+**（含 pip）
+- **Python 3.8+** + `pip3 install pycryptodome zstandard pyyaml`
 - **OpenClaw** 已配置 Discord
 - Python 依赖：`pycryptodome`, `zstandard`, `pyyaml`
 

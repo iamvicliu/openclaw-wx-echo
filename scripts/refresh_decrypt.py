@@ -26,7 +26,11 @@ import sys
 import time
 import argparse
 
-from Crypto.Cipher import AES
+try:
+    from Crypto.Cipher import AES
+except ImportError:
+    print("[ERROR] 缺少 pycryptodome，请运行: pip3 install pycryptodome", file=sys.stderr)
+    sys.exit(1)
 
 PAGE_SZ = 4096
 KEY_SZ = 32
