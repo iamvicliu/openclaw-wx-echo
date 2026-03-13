@@ -59,7 +59,21 @@ python3 extract_todos.py --config {{config_path}}
 
 ### 4. 更新 todos.json
 
-读取当前 `{{config_path}}` 对应的 `state.todos_file`，更新后写回：
+todos.json 路径：从 config.yaml 的 `state.todos_file` 读取（默认在 config.yaml 同级目录的 `./todos.json`）。
+
+用 `exec` 工具执行 Python 脚本读写：
+
+```bash
+python3 -c "
+import json, os
+path = '{{config_path}}'.replace('config.yaml', '') + 'todos.json'
+# ... 读取、更新、写回
+"
+```
+
+或直接用 `read` + `write` 工具操作文件。
+
+更新规则：
 - 新增的待办：`status: "open"`，含 `contact`, `summary`, `urgent`, `created`
 - 已解决的：`status: "done"`，加 `resolved_date`
 

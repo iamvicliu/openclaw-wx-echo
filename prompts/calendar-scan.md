@@ -55,7 +55,12 @@ python3 extract_calendar.py --config {{config_path}}
 - 聚餐邀约、活动邀请 → 创建事件但标注"待确认"
 - 工作群里安排的会议 → 直接创建
 
-### 4. 创建 Apple Calendar 事件
+### 4. 创建日历事件
+
+> ⚠️ **osascript 需要 macOS GUI 会话**。如果 OpenClaw 跑在无头 Mac（如 Mac Mini Server），
+> osascript 会阻塞。此时必须通过 SSH 到有 GUI 会话的机器执行（通常是用户的 MacBook）。
+> 如果 `{{ssh_host}}` 非空，用 SSH 执行 osascript。如果为空且当前机器无 GUI，跳过日历创建，
+> 只推送 Discord 提醒。
 
 对每个确认的日程，用 osascript 创建：
 

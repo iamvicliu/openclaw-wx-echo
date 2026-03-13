@@ -295,6 +295,19 @@ def main():
                 continue
 
         elif wal_changed:
+            # WAL patch 前也要验证密钥（最常见场景：密钥过期 + 只有 WAL 变化）
+            try:
+                if not verify_page1_hmac(src_path, enc_key):
+                    print(f'[ERROR] HMAC 验证失败 {rel} — 密钥可能已过期（微信重启过？）',
+                          file=sys.stderr)
+                    hmac_fail_count += 1
+                    continue
+            except PermissionError:
+                print(f'[ERROR] 无权读取 {src_path} — 需要 sudo 或 Full Disk Access',
+                      file=sys.stderr)
+                hmac_fail_count += 1
+                continue
+
             # WAL patch（主 DB 没变，只有 WAL 更新）
             try:
                 wp = patch_wal(wal_path, out_path, enc_key)

@@ -75,9 +75,14 @@ extract_*.py（提取 JSON）→ Agent 分析 → Discord 推送
 
 用户说"帮我设置微信助手"时，Agent 按以下步骤引导：
 
-### Step 1: 安装 Python 依赖
+> **工作目录（`<work_dir>`）**：用户存放 config.yaml、all_keys.json、collector.db 等运行时文件的目录。
+> 建议创建 `~/wechat-assistant`。Agent 引导时先询问用户想放哪里，默认 `~/wechat-assistant`。
+> `<skill_dir>` 是 skill 安装目录（只读代码），`<work_dir>` 是运行时数据目录（可写）。
+
+### Step 1: 创建工作目录 + 安装依赖
 
 ```bash
+mkdir -p ~/wechat-assistant && cd ~/wechat-assistant
 pip3 install pycryptodome zstandard pyyaml
 ```
 
@@ -88,7 +93,7 @@ cd <skill_dir>/scripts/decrypt
 cc -O2 -o find_all_keys_macos find_all_keys_macos.c -framework Foundation
 ```
 
-> 需要 sudo 权限运行。微信桌面版必须正在运行。
+> 编译不需要 sudo。运行密钥提取时才需要 sudo。微信桌面版必须正在运行。
 
 ### Step 3: 提取密钥
 
@@ -123,16 +128,14 @@ python3 decrypt/decrypt_db.py --config <config_path>
 ### Step 6: 首次采集
 
 ```bash
-# 自动发现所有群和私聊，注册到 watched_chats
-python3 <skill_dir>/scripts/collector.py --config <config_path> --discover
-
-# 执行首次同步
+# 首次同步（自动发现所有群和私聊）
 python3 <skill_dir>/scripts/collector.py --config <config_path> --sync
 ```
 
-> `--discover` 会扫描 session.db 和 contact.db，自动找到所有群聊和私聊。
-> `--sync` 首次运行时如果 watched_chats 为空，也会自动触发 discover。
-> ⚠️ discover 会注册所有历史会话，首次同步可能较慢。可用 `sqlite3 collector.db "DELETE FROM watched_chats WHERE chatroom_id NOT LIKE '%@chatroom'"` 只保留群聊，或手动删除不需要的条目。
+> `--sync` 首次运行时如果 watched_chats 为空，会自动触发 discover（扫描 session.db 和 contact.db）。
+> ⚠️ 首次同步会注册所有历史会话，可能较慢。同步完成后可用：
+> `sqlite3 <work_dir>/collector.db "SELECT chatroom_id, chatroom_name FROM watched_chats LIMIT 20"`
+> 查看已注册的会话，手动删除不需要的。
 
 ### Step 7: 创建 Discord 子区
 
