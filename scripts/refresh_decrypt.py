@@ -19,12 +19,18 @@ refresh_decrypt.py — 增量刷新解密数据库（WAL patch 模式）
 """
 import hashlib
 import hmac as hmac_mod
+import io
 import json
 import os
 import struct
 import sys
 import time
 import argparse
+
+# Windows 默认 GBK 编码，中文输出会崩溃
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 try:
     from Crypto.Cipher import AES

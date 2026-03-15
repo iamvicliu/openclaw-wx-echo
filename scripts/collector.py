@@ -6,7 +6,13 @@ collector.py — 微信消息采集转存（一次性同步命令）
   python3 collector.py --config config.yaml --sync                    # 同步所有 watched_chats
   python3 collector.py --config config.yaml --sync --chatroom ID      # 同步单个群
 """
-import os, sys, json, time, glob, sqlite3, hashlib, re, argparse
+import os, sys, io, json, time, glob, sqlite3, hashlib, re, argparse
+
+# Windows 默认 GBK 编码，中文输出会崩溃
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 import xml.etree.ElementTree as _ET
 from datetime import datetime, timezone, timedelta
 

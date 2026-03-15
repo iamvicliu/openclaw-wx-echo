@@ -31,7 +31,7 @@ def load_config(config_path=None):
         print(f"[ERROR] 配置文件不存在: {config_path}", file=sys.stderr)
         sys.exit(1)
 
-    with open(config_path) as f:
+    with open(config_path, encoding='utf-8') as f:
         raw = yaml.safe_load(f) or {}
 
     base = os.path.dirname(os.path.abspath(config_path))
