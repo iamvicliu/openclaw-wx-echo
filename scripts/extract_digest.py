@@ -17,11 +17,17 @@ extract_digest.py — 从 collector.db 提取群聊消息，输出 JSON（不调
 }
 """
 import sqlite3
+import io
 import json
 import os
 import sys
 import argparse
 from datetime import datetime, timezone, timedelta
+
+# Windows 默认 GBK 编码，中文输出会崩溃
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 _TZ8 = timezone(timedelta(hours=8))
 
