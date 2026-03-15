@@ -77,24 +77,61 @@ path = '{{config_path}}'.replace('config.yaml', '') + 'todos.json'
 - 新增的待办：`status: "open"`，含 `contact`, `summary`, `urgent`, `created`
 - 已解决的：`status: "done"`，加 `resolved_date`
 
-### 5. 推送到 Discord
+### 5. 推送到 Discord Forum
 
-**只在有变化时**（新增或完成）发送到 thread {{thread_id}}：
+**只在有变化时**（新增或完成）推送到论坛频道 `{{todo_forum_id}}`。
 
-格式：
+> **发帖方式**：使用 OpenClaw `message` 工具，`action=thread-create`，`target={{todo_forum_id}}`，
+> `threadName=帖子标题`，`message=帖子内容`，`appliedTags=["tag名称"]`。
+>
+> ⚠️ 如果 `message(action=thread-create)` 报错，改用 `exec` 执行 curl：
+> ```bash
+> curl -s -X POST "https://discord.com/api/v10/channels/{{todo_forum_id}}/threads" \
+>   -H "Authorization: Bot $DISCORD_BOT_TOKEN" \
+>   -H "Content-Type: application/json" \
+>   -d '{"name":"帖子标题","applied_tags":["tag_id"],"message":{"content":"帖子内容"}}'
+> ```
+> Tag IDs 需要先用 `curl GET /channels/{{todo_forum_id}}` 查 `available_tags` 获取。
+
+#### 5a. 去重检查
+
+发帖前，先搜索论坛已有帖子，避免重复：
+
 ```
-📋 **YYYY-MM-DD HH:MM 微信待办更新**
-
-🔴 **紧急**
-1. **联系人** — 待办描述
-
-🟡 **需跟进**
-1. **联系人** — 待办描述（创建日期）
-
-✅ **已完成**
-- ~~联系人 — 待办描述~~
-
-📊 N 新增 · N 完成 · N 待处理
+message(action="thread-list", target="{{todo_forum_id}}")
 ```
 
-如果没有变化，不发消息。
+检查返回的帖子列表，按**联系人 + 关键词**匹配。如果已有相同待办的帖子，跳过创建。
+
+#### 5b. 新增待办 → 每条一个帖子
+
+对每条**新增**待办，创建一个论坛帖子：
+
+- **帖子标题**：
+  - 紧急：`[🔴紧急] 联系人 — 待办摘要`
+  - 跟进：`[🟡跟进] 联系人 — 待办摘要`
+- **帖子内容**：
+  ```
+  📋 **待办详情**
+
+  **联系人**：XXX
+  **摘要**：待办描述
+  **紧急程度**：🔴紧急 / 🟡跟进
+  **创建时间**：YYYY-MM-DD HH:MM
+
+  💬 **来源对话摘录**
+  > 相关对话内容...
+  ```
+- **appliedTags**：
+  - 紧急 → `["🔴紧急"]`
+  - 跟进 → `["🟡跟进"]`
+
+#### 5c. 已完成待办 → 回复原帖并标记
+
+对每条**已解决**的待办：
+
+1. 在 5a 的帖子列表中查找对应的原帖（按联系人 + 关键词匹配）
+2. 如果找到原帖，用 `message(action="thread-reply", threadId=原帖ID, message="✅ 已完成 — YYYY-MM-DD")` 回复
+3. 如果找不到原帖，跳过（不单独创建完成帖子）
+
+如果没有变化（无新增、无完成），不发任何消息。

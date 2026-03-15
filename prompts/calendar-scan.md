@@ -73,21 +73,58 @@ tell application "Calendar"
 end tell'
 ```
 
-### 5. 推送到 Discord
+### 5. 推送到 Discord Forum
 
-发送到 thread {{thread_id}}：
+推送到论坛频道 `{{calendar_forum_id}}`。
 
-格式：
+> **发帖方式**：使用 OpenClaw `message` 工具，`action=thread-create`，`target={{calendar_forum_id}}`，
+> `threadName=帖子标题`，`message=帖子内容`，`appliedTags=["tag名称"]`。
+>
+> ⚠️ 如果 `message(action=thread-create)` 报错，改用 `exec` 执行 curl：
+> ```bash
+> curl -s -X POST "https://discord.com/api/v10/channels/{{calendar_forum_id}}/threads" \
+>   -H "Authorization: Bot $DISCORD_BOT_TOKEN" \
+>   -H "Content-Type: application/json" \
+>   -d '{"name":"帖子标题","applied_tags":["tag_id"],"message":{"content":"帖子内容"}}'
+> ```
+> Tag IDs 需要先用 `curl GET /channels/{{calendar_forum_id}}` 查 `available_tags` 获取。
+
+#### 5a. 去重 + 过期检查
+
+先获取论坛已有帖子：
+
 ```
-📅 **YYYY-MM-DD HH:MM 日程扫描**
+message(action="thread-list", target="{{calendar_forum_id}}")
+```
 
-✅ **已创建日程**
-1. 📌 **事件标题** — 3月15日 15:00-16:00
-   来源：联系人名 · 已添加到 Apple Calendar
+- 按**事件标题 + 时间**匹配，避免重复创建
+- 检查已有帖子中是否有**已过期**的日程（事件时间已过），标记关闭：
+  用 `message(action="thread-reply", threadId=原帖ID, message="✅ 日程已过")` 回复
 
-⏳ **待确认**
-1. 🤔 **聚餐邀约** — 周六晚上
-   来源：张三 · 需要你确认是否参加
+#### 5b. 每条日程 → 一个帖子
+
+对每条新日程，创建论坛帖子：
+
+- **帖子标题**：
+  - 已确认：`[📌已确认] 事件标题 — 3月15日 15:00`
+  - 待确认：`[🤔待确认] 事件标题`
+- **帖子内容**：
+  ```
+  📅 **日程详情**
+
+  **事件**：事件标题
+  **时间**：YYYY-MM-DD HH:MM — HH:MM
+  **地点**：XXX（如有）
+  **状态**：📌已确认 / 🤔待确认
+  **来源联系人**：XXX
+
+  💬 **对话摘录**
+  > 相关对话内容...
+
+  🗓️ 已添加到 Apple Calendar（如已创建）
+  ```
+- **appliedTags**：
+  - 已确认 → `["📌已确认"]`
+  - 待确认 → `["🤔待确认"]`
 
 如果没有日程，不发消息。
-```

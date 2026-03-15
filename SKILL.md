@@ -137,14 +137,24 @@ python3 <skill_dir>/scripts/collector.py --config <config_path> --sync
 > `sqlite3 <work_dir>/collector.db "SELECT chatroom_id, chatroom_name FROM watched_chats LIMIT 20"`
 > 查看已注册的会话，手动删除不需要的。
 
-### Step 7: 创建 Discord 子区
+### Step 7: 创建 Discord 频道
 
-在用户指定的 Discord 频道下创建 3 个 thread：
-1. **待办事项**
-2. **日程安排**
-3. **干货收集**
+> ⚠️ Forum 频道需要服务器已开启"社区"功能（服务器设置 → 启用社区 → 开启论坛频道）。
 
-使用 `message(action="thread-create")` 创建。
+在用户指定的 Discord 类目下创建：
+
+#### 2 个 Forum 频道
+
+1. **📋 WX-待办**
+   - 使用 `message(action="channel-create", name="📋 WX-待办", type=15)` 创建（type 15 = Forum）
+   - 创建后添加 tags：`🔴紧急`、`🟡跟进`、`✅已完成`
+2. **📅 WX-日程**
+   - 使用 `message(action="channel-create", name="📅 WX-日程", type=15)` 创建
+   - 创建后添加 tags：`📌已确认`、`🤔待确认`、`✅已过`
+
+#### 1 个 Thread（保持不变）
+
+3. **干货收集** — 在指定频道下创建 thread，使用 `message(action="thread-create")`
 
 ### Step 8: 注册 Cron 任务
 
@@ -154,7 +164,9 @@ python3 <skill_dir>/scripts/collector.py --config <config_path> --sync
 |--------|------|
 | `{{config_path}}` | config.yaml 的绝对路径 |
 | `{{skill_dir}}` | skill 根目录绝对路径 |
-| `{{thread_id}}` | 对应 Discord 子区 ID |
+| `{{todo_forum_id}}` | 待办论坛频道 ID |
+| `{{calendar_forum_id}}` | 日程论坛频道 ID |
+| `{{thread_id}}` | 干货收集 Thread ID |
 | `{{groups}}` | 监控群 ID 列表（逗号分隔） |
 | `{{ssh_host}}` | 微信所在机器的 SSH 地址（如果微信不在本机，留空表示本机直接执行） |
 | `{{ssh_password}}` | SSH 密码（配合 sshpass 使用） |
